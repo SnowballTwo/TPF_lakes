@@ -1,0 +1,43 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 8.0, 8.0, 0.0, },
+		bbMin = { 0.0, 0.0, 0.0, },
+	},
+	collider = {
+		params = {
+			center = { 4.0, 4.0, 0.0 },
+			halfExtents = { 4.0, 4.0, 0.0 }
+		},
+		type = "BOX"
+	},
+	lods = {
+		{
+			children = {
+				{
+					id = "asset/snowball_laker_water_128.msh",
+					transf = {
+						0.254, 0.0, 0.0, 0.0, 0.0, 0.254, 0.0, 0.0, 0.0, 0.0, 0.254, 0.0, 0.0, 0.0, 0.0, 1.0, 
+					},
+					type = "MESH",
+				}, 
+			},
+			matConfigs = {
+				{ 0, }, 
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 10000,
+		}, 
+	},
+	metadata = {
+		availability = {
+			yearFrom = 0,
+			yearTo = 0,
+		},
+		cost = {
+			price = 0,
+		},
+	},
+}
+end

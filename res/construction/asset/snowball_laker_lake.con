@@ -1,0 +1,110 @@
+local polygon = require "snowball_laker_polygon"
+local laker = require "snowball_laker"
+
+function data()
+    return {
+        type = "ASSET_DEFAULT",
+        buildMode = "MULTI",
+        categories = {
+            "misc"
+        },
+        availability = {
+            yearFrom = 244,
+            yearTo = 245
+        },
+        description = {
+            name = _("patch_title"),
+            description = _("patch_description")
+        },
+        order = 197720402,
+        skipCollision = true,
+        autoRemovable = false,
+        updateFn = function(params)
+            
+            local result = {
+                models = {},
+                cost = 10,
+                bulldozeCost = 10,
+                maintenanceCost = 0
+            }
+            local outline = params.outline
+
+            if not outline then
+                result.models[#result.models + 1] = {
+                    id = "asset/snowball_laker_suspensor.mdl",
+                    transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+                }
+                return result
+            end
+
+            local maxTileSize = 128
+            local minTileSize = 8
+            local bounds = polygon.getBounds(outline)
+            local surface = outline[1][3]
+
+            local horizontalTiles = math.ceil(bounds.width / maxTileSize)
+            local verticalTiles = math.ceil(bounds.height / maxTileSize)
+
+            local checkMap = {}
+
+            local tileSize = minTileSize
+            while tileSize <= maxTileSize do
+                checkMap[tileSize] = {}
+                tileSize = tileSize * 2
+            end
+
+            for i = 1, #outline do
+                local tileSize = minTileSize
+                while tileSize <= maxTileSize do
+                    local x = math.floor((outline[i][1] - bounds.x) / tileSize) * tileSize
+                    local y = math.floor((outline[i][2] - bounds.y) / tileSize) * tileSize
+
+                    laker.set(checkMap[tileSize], x, y, true)
+                    tileSize = tileSize * 2
+                end
+            end
+
+            for i = 1, horizontalTiles do
+                for j = 1, verticalTiles do
+
+                    local x = bounds.x + maxTileSize * (i - 1)
+                    local y = bounds.y + maxTileSize * (j - 1)
+
+                    laker.placeOrDivide(x, y, surface, maxTileSize, minTileSize, checkMap, outline, bounds, result.models)
+                end
+            end
+
+            local ground = params.ground
+            local fill = "water_ground"
+            if ground == 1 then
+                fill = "industry_gravel_small_01"
+            elseif ground == 2 then
+                fill = "industry_gravel_big_01"
+            end
+
+            local shore = params.shore
+            local stroke = "snowball_laker_grass_border"
+            if shore == 1 then
+                stroke = "water_shore"
+            end
+
+            result.groundFaces = {
+                {
+                    face = outline,
+                    modes = {
+                        {
+                            type = "FILL",
+                            key = fill
+                        },
+                        {
+                            type = "STROKE",
+                            key = stroke
+                        }
+                    }
+                }
+            }
+
+            return result
+        end
+    }
+end

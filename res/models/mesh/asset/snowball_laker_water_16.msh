@@ -1,0 +1,54 @@
+function data()
+return {
+	matConfigs = {
+		{ 0, }, 
+	},
+	subMeshes = {
+		{
+			indices = {
+				normal = {
+					count = 48,
+					offset = 160,
+				},
+				position = {
+					count = 48,
+					offset = 256,
+				},
+				tangent = {
+					count = 48,
+					offset = 304,
+				},
+				uv0 = {
+					count = 48,
+					offset = 208,
+				},
+			},
+			materials = {
+				"asset/snowball_laker_water.mtl", 
+			},
+		}, 
+	},
+	vertexAttr = {
+		normal = {
+			count = 24,
+			numComp = 3,
+			offset = 0,
+		},
+		position = {
+			count = 48,
+			numComp = 3,
+			offset = 80,
+		},
+		tangent = {
+			count = 32,
+			numComp = 4,
+			offset = 128,
+		},
+		uv0 = {
+			count = 56,
+			numComp = 2,
+			offset = 24,
+		},
+	},
+}
+end

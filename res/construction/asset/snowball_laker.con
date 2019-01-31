@@ -1,0 +1,124 @@
+local laker = require "snowball_laker"
+
+local modes = {"plan", "fill", "reset"}
+
+function data()
+    return {
+        type = "ASSET_DEFAULT",
+        buildMode = "MULTI",
+        categories = {"tree"},
+        availability = {
+            yearFrom = 0,
+            yearTo = 0
+        },
+        description = {
+            name = _("title"),
+            description = _("description")
+        },
+        order = 197720401,
+        skipCollision = true,
+        autoRemovable = false,
+        params = {
+            {
+                key = "mode",
+                name = _("mode"),
+                values = {_("plan"), _("fill"), _("reset")},
+                defaultIndex = 0
+            },
+            {
+                key = "shore",
+                name = _("shore"),
+                values = {_("green"), _("sand")},
+                defaultIndex = 1
+            },
+            {
+                key = "ground",
+                name = _("ground"),
+                values = {_("green"), _("sand"), _("gravel")},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_laker_lock",
+                name = _("snowball_laker_lock"),
+                values = {
+                    _("snowball_laker_lock_unlock"),
+                    _("snowball_laker_lock_lock")
+                },
+                defaultIndex = 0
+            }
+        },
+        updateFn = function(params)
+            local result = {
+                models = {},
+                cost = 10,
+                bulldozeCost = 10,
+                maintenanceCost = 0
+            }
+            local mode = modes[params.mode + 1]
+            local interactive = params.snowball_laker_lock == 0
+            local objects = laker.getObjects()
+            local finishers = objects.finishers
+            local markers = objects.markers
+            local built = objects.built
+
+            local lakepoly = nil
+
+            if markers and #markers > 0 then
+                lakepoly = laker.getPolygon(markers[#markers].position)
+            end
+
+            result.models = {}
+
+            result.terrainAlignmentLists = {
+                {
+                    type = "EQUAL",
+                    faces = {}
+                }
+            }
+
+            if not built then
+                laker.lock(interactive)
+            end
+
+            if mode == "plan" then
+                laker.clearFinishers()
+
+                for i = 1, #markers + 1 do
+                    laker.marker(result)
+                end
+
+                if lakepoly then
+                    local lakezone = {polygon = lakepoly, draw = true, drawColor = {38 / 255, 89 / 255, 173 / 255, 1.0}}
+                    game.interface.setZone("lakezone", lakezone)
+                end
+            elseif mode == "reset" then
+                laker.finisher(result)
+                game.interface.setZone("lakezone", nil)
+                laker.clearMarkers()
+            elseif mode == "fill" then
+                laker.finisher(result)
+                game.interface.setZone("lakezone", nil)
+                laker.clearMarkers()
+
+                if (not lakepoly) then
+                    return result
+                end
+
+                local entity =
+                    game.interface.buildConstruction(
+                    "asset/snowball_laker_lake.con",
+                    {outline = lakepoly, shore = params.shore, ground = params.ground},
+                    {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+                )
+                if interactive then
+                    local player = game.interface.getPlayer()
+                    game.interface.setPlayer(entity, player)
+                end
+            else
+                error("laker: invalid operation ", mode)
+            end
+
+            return result
+        end
+    }
+end
